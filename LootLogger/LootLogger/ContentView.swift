@@ -14,12 +14,45 @@ class ItemStore{
 }
 
 class Item: Equatable{
-    static func ==(lhs: Item, rhs, rhs: Item)-> Bool{
+    static func == (lhs: Item, rhs, rhs: Item)-> Bool{
         return lhs.name == rhs.name
         && lhs.serialNumber == rhs.serialNumber
         && lhs.valueInDollars == rhs.valueInDollars
         && lhs.dateCreated == rhs.dateCreated }
     }
+
+class DetailViewController: UIViewController{
+    @IBOutlet weak var nameField: UITextField!
+    @IBOutlet weak var serialField: UITextField!
+    @IBOutlet weak var valueField: UITextField!
+    @IBOutlet weak var dateLabel: UILabel!
+    
+    override func viewWillAppear(_ animated: Bool){
+        super.viewWillAppear(animated: Bool)
+        nameField.text = item.serialNumber
+        valueField.text = "\\(item.valueInDollars)"
+        dateLabel.text = "\\(item.dateCreated)"
+    }
+    
+    let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigitd = 2
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }()
+    
+    let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }()
+    
+    let navController = window!.rootViewController as UINavigationController
+    let itemsController = navController.topViewController as! ItemdViewController
+    itemsController.itemStore = itemStore
+}
 
 init( name: String, serialNumber: String?, valueInDollars: Int){
     self.name = name
@@ -124,4 +157,16 @@ func moveItem(from fromIndex: Int, to toIndex: Int){
     allItems.remove(at: fromIndex)
     
     allItems.insert(movedItem, at: toIndex)
+}
+
+override func prepare(for segue: UIStoryboardSegue, sender: Any?){
+    switch segue.identifier {
+    case "showItem":
+        if let row = tableView.indexPathForSelectedRow?.row{
+            lwt detailViewController = segue.destination as! DetailViewController
+            detailViewController.item = item
+        }
+    default:
+        preconditionFailure("Unexpected segue identifier.")
+    }
 }
